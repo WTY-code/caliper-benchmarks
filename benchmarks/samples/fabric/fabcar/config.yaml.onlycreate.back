@@ -1,0 +1,14 @@
+test:
+  workers:
+    number: 5
+  rounds:
+    - label: Create a car.
+      # 5000 transactions should create around 1000 cars per worker but not guaranteed
+      # so need to set asset limits to less than 1000 for the other tests
+      txNumber: 5000
+      rateControl:
+          type: fixed-rate
+          opts:
+            tps: 500
+      workload:
+        module: benchmarks/samples/fabric/fabcar/createCar.js
