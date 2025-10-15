@@ -1,0 +1,12 @@
+[
+  {
+    "functionName":"changeCarOwner",
+    "arguments": ["CAR22" , "wty"],
+    "readOnly": false
+  },
+  {
+    "functionName": "changeCarOwner",
+    "arguments": ["CAR13", "wty"],
+    "readOnly": false
+  }
+]
