@@ -1,0 +1,20 @@
+test:
+  workers:
+    number: 1
+  rounds:
+    - label: custom workload
+      description: read transactions from a json file and send requests to fabric smallbank
+      txNumber: 1000  # 需要跟实际交易数对齐，不然日志会一直刷
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 100
+      workload:
+        module: benchmarks/scenario/smallbank/customWorkLoad.js
+        arguments:
+          contractId: smallbank
+          contractVersion: '1.0'  # 如你升级为1.1，请同步修改
+          # 这里支持绝对或相对路径
+          txFilePath: "/root/ruc/data/transactions1000-0.7.json"
+      # 可选最大持续时间，避免误配置导致长时间等待
+      # duration: 60  # 单位为秒 (seconds)。表示本轮最多持续60秒。
