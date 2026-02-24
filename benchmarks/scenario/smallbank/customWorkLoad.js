@@ -4,6 +4,8 @@ const { WorkloadModuleBase } = require('@hyperledger/caliper-core');
 const fs = require('fs');
 const path = require('path');
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 class SmallbankCustomWorkload extends WorkloadModuleBase {
     constructor() {
         super();
@@ -24,20 +26,29 @@ class SmallbankCustomWorkload extends WorkloadModuleBase {
         if (roundArguments && roundArguments.contractVersion) {
             this.contractVersion = roundArguments.contractVersion;
         }
-
+        
         // 读取并解析交易文件
         const absolutePath = path.isAbsolute(txFilePath) ? txFilePath : path.join(process.cwd(), txFilePath);
         const raw = fs.readFileSync(absolutePath);
-        this.transactions = JSON.parse(raw);
+        const allTransactions = JSON.parse(raw);
+        
+        // 多 Worker 分片逻辑
+        // 采用 Round-Robin 方式分配
+        if (totalWorkers > 1) {
+            this.transactions = allTransactions.filter((_, index) => index % totalWorkers === workerIndex);
+        } else {
+            this.transactions = allTransactions;
+        }
+
         this.currentIndex = 0;
-        console.log(`Worker ${workerIndex} loaded ${this.transactions.length} txs from ${absolutePath}`);
+        console.log(`Worker ${workerIndex}/${totalWorkers} loaded ${this.transactions.length}/${allTransactions.length} txs.`);
     }
 
     async submitTransaction() {
         if (this.currentIndex >= this.transactions.length) {
             return {};
         }
-
+        
         const tx = this.transactions[this.currentIndex++];
 
         const request = {
@@ -54,12 +65,15 @@ class SmallbankCustomWorkload extends WorkloadModuleBase {
             }
         };
 
-        // 打印首尾少量日志，避免刷屏
-        if (this.currentIndex <= 3 || this.currentIndex === this.transactions.length) {
-            console.log(`Submitting tx ${request.metadata.txIdInFile}: ${request.contractFunction} args=${JSON.stringify(request.contractArguments)}`);
+        try {
+            await this.sutAdapter.sendRequests(request);
+        } catch (error) {
+            if (error.message && error.message.includes('Channel has been shut down')) {
+                 // 忽略 Channel 关闭错误
+            } else {
+                 console.error(`[Worker ${this.workerIndex}] Error submitting tx ${request.metadata.txIdInFile}: ${error}`);
+            }
         }
-
-        await this.sutAdapter.sendRequests(request);
     }
 
     async cleanupWorkloadModule() {

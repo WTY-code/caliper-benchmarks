@@ -19,4 +19,4 @@ test:
         arguments:
           <<: *smallbank-args
           contractId: smallbank
-          outputPath: /root/ruc/data/ws1130_50000.json
+          outputPath: /root/ruc/data/benchmark/world_state.json
