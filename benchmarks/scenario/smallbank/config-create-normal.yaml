@@ -13,4 +13,4 @@ test:
         arguments:
           contractId: smallbank
           contractVersion: '1.0'
-          txFilePath: /root/ruc/data/tmp/accounts_create_normal.json
+          txFilePath: /root/PerfTuner/data/tmp/accounts_create_normal.json

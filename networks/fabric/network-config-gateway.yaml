@@ -1,0 +1,21 @@
+
+name: Caliper Network Gateway
+version: "2.0.0"
+caliper:
+  blockchain: fabric
+channels:
+  - channelName: mychannel
+    contracts:
+    - id: smallbank
+organizations:
+  - mspid: Org1MSP
+    identities:
+      certificates:
+      - name: 'User1'
+        clientPrivateKey:
+          path: '/root/PerfTuner/infra/topology-manager/artifacts/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/keystore/priv_sk'
+        clientSignedCert:
+          path: '/root/PerfTuner/infra/topology-manager/artifacts/crypto-config/peerOrganizations/org1.example.com/users/User1@org1.example.com/msp/signcerts/User1@org1.example.com-cert.pem'
+    connectionProfile:
+      path: '/root/PerfTuner/infra/topology-manager/artifacts/connection-profiles/connection-org1.yaml'
+      discover: true
